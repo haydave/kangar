@@ -1,0 +1,44 @@
+.ui-selectmenu.ui-popup .ui-input-search {
+    margin-left: .5em;
+    margin-right: .5em;
+}
+.ui-selectmenu.ui-dialog .ui-content {
+    padding-top: 0;
+}
+.ui-selectmenu.ui-dialog .ui-selectmenu-list {
+    margin-top: 0;
+}
+.ui-selectmenu.ui-popup .ui-selectmenu-list li.ui-first-child .ui-btn {
+    border-top-width: 1px;
+    -webkit-border-radius: 0;
+    border-radius: 0;
+}
+.ui-selectmenu.ui-dialog .ui-header {
+    border-bottom-width: 1px;
+}
+@media ( min-width: 40em ) {
+	/* Show the table header rows and set all cells to display: table-cell */
+	.my-custom-breakpoint td,
+	.my-custom-breakpoint th,
+	.my-custom-breakpoint tbody th,
+	.my-custom-breakpoint tbody td,
+	.my-custom-breakpoint thead td,
+	.my-custom-breakpoint thead th {
+		display: table-cell;
+		margin: 0;
+	}
+	/* Hide the labels in each cell */
+	.my-custom-breakpoint td .ui-table-cell-label,
+	.my-custom-breakpoint th .ui-table-cell-label {
+		display: none;
+	}
+}
+#movie-table thead tr th{
+    margin: 0;
+    padding: 0;
+}
+@media (max-width: 35em) {
+    #movie-table th{
+        margin-top: 12px; /* optional spacing during reflow */
+    }
+}
