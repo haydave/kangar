@@ -69,23 +69,43 @@ function getBusesHoursOfStation(stationId, hour) {
         return busesList;
     }
 }
+// bus - string/integer - bus id
+// station - integer/string - station id
+function getBothHoursList(bus, station) {
+    var hours=[];
+    $.each(buses, function(index, value) {
+        if (value.number === parseInt(bus, 10)) {
+            $.each(value.bus_stations, function(index, value) {
+                if (value.hasOwnProperty(station)) {
+                    $.each(value[selectedStation], function(index, value) {
+                        hours.push(value);
+                    });
+                    return false;
+                }
+            });
+            return false;
+        }
+    });
+    return hours;
+}
 // selected - string/integer - id of bus/station
 // state - integer - if 0 this is bus,
 //                   if 1 this is station,
 //                   if 2 there are both. 
 function updateHoursTable(selected, state) {
     var hours;
+        s1 = $("#bus_station_list");
+        s2 = $("#bus_list");
     if (typeof selected !== "undefined") {
         if (state === 0) {
             hours = getStationsHoursOfBus(selected, true);
         } else if (state === 1 ) {
             hours = getBusesHoursOfStation(selected, true)
         }
-        drawTableOfHours(hours, state);
+    } else if (state === 2) {
+        hours = getBothHoursList(s2, s1);
     }
-/*    else if (state === 2) {
-            //pass
-        }*/
+    drawTableOfHours(hours, state);
 }
 // hours - array - the list of hours
 // state - integer - if 0 this is bus,
@@ -108,13 +128,19 @@ function drawTableOfHours(hours, state) {
         });
     } else if (state === 1 && hours[0].length === hours[1].length) {
         for (i = 0; i < hours[0].length; i++) {
-            htmlString += "<tr>"
+            htmlString += "<tr>";
             htmlString += "<td>"+hours[0][i]+"</td>";
             for (j = 0; j < hours[1][i].length; j++) {
                 htmlString += "<td>"+hours[1][i][j]+"</td>";
             }
             htmlString += "</tr>";
         }
+    } else if (state === 2) {
+        htmlString += "<tr>";
+        $.each(hours, function(index, value) {
+            htmlString += "<td>"+value+"</td>";
+        });
+        htmlString += "</tr>";
     }
 
     $("tbody").empty().append(htmlString);
@@ -134,44 +160,6 @@ function toggleSelects(selectMenu, checkbox1, checkbox2) {
         $("#hours-table").hide();
     }
 }
-/*    if (typeof selectedBus !== "undefined" && typeof selectedStation !== "undefined") {
-        $.each(buses, function(index, value) {
-            if (value.number === parseInt(selectedBus, 10)) {
-                $.each(value.bus_stations, function(index, value) {
-                    if (value.hasOwnProperty(selectedStation)) {
-                        var hoursList="";
-                        $.each(value[selectedStation], function(index, value) {
-                            hoursList += "<td>"+value+"</td>";
-                        });
-                        $("#hours-row td").remove();
-                        $("#hours-row").append(hoursList);
-                        return false;
-                    }
-                });
-                return false;
-            }
-        });
-    }*/
-/*    stationList = "";
-    hoursList = "";
-    if (typeof selectedBus !== "undefined") {
-        $.each(buses, function(index, value) {
-            if (value.number === parseInt(selectedBus, 10)) {
-                $.each(value.bus_stations, function(index, value) {
-                    for ( id in value ) {
-                        stationList += "<td>"+getStationNameById(id)+"</td>";
-                        $.each(value[id], function(index, value) {
-                            hoursList += "<td>"+value+"</td>";
-                        });
-                    }
-                });
-            }
-        });
-    }
-    $("#hours-row td").remove();
-    $("#hours-row").append(stationList);
-    $("#hours-row").append(hoursList);*/
-
 
 function updateBusStationList() {
 /*    busStationsList = "";
@@ -289,11 +277,13 @@ $.mobile.document
     $("#bus_list").on("change", function() {
         var selectedBus = this.value;
         updateHoursTable(selectedBus, 0);
+        updateHoursTable(undefined, 2);
         //updateBusStationList()
     });
     $("#bus_station_list").on("change", function() {
         var selectedStation = this.value;
         updateHoursTable(selectedStation, 1);
+        updateHoursTable(undefined, 2);
         //updateBusList();
     });
     $("#bus_checkbox").on("change", function() {
@@ -302,13 +292,4 @@ $.mobile.document
     $("#station_checkbox").on("change", function() {
         toggleSelects($("#bus_station_list"), $("#station_checkbox"), $("#bus_checkbox"));
     });
-/*    $("#bus_list").on("vclick", function() {
-        console.log("sadsad")
-        $("#bus_list option").not(":first").remove();
-        $("#bus_list").append(busList).selectmenu( "refresh" );
-    });
-    $("#bus_station_list").on("vclick", function() {
-        $("#bus_station_list option").not(":first").remove();
-        $("#bus_station_list").append(busStationsList).selectmenu( "refresh" );
-    });*/
 })( jQuery );
