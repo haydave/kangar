@@ -27,10 +27,10 @@ function getStationNameById(id) {
 }
 // busNumber - string/integer - bus number
 // hour - boolean - if true return bus stations with hours,
-//                   if false return stations list
-// mtacel vor miangamic stationneri anunner@ poxancenq???
+//                   if false return stations list with ids
 function getStationsHoursOfBus(busNumber, hour) {
-    var list = [];
+    var list = [],
+        stationId = [];
     $.each(buses, function(index, value) {
         if (value.number === parseInt(busNumber, 10)) {
             if (hour) {
@@ -39,13 +39,18 @@ function getStationsHoursOfBus(busNumber, hour) {
                 $.each(value.bus_stations, function(index, value) {
                     for ( id in value ) {
                         list.push(getStationNameById(id));
+                        stationId.push(id);
                     }
                 });
             }
         return false;
         }
     });
-    return list;
+    if (hour) {
+        return list;
+    } else {
+        return [stationId,list];        
+    }
 }
 // stationId - string/integer - id of station
 // hour - boolean - if true return buses with hours,
@@ -154,36 +159,62 @@ function toggleSelects(selectMenu, checkbox1, checkbox2) {
         $("#hours-table").hide();
     }
 }
-
-function updateBusStationList() {
-/*    busStationsList = "";
-    if (typeof selectedBus !== "undefined") {
-        $.each(buses, function(index, value) {
-            if (value.number === parseInt(selectedBus, 10)) {
-                $.each(value.bus_stations, function(index, value) {
-                    for ( property in value ) {
-                        $.each(busStations, function(index, value) {
-                            if (value.id === parseInt(property,10)) {
-                                busStationsList += "<option value='"+value.id+"'>"+value.name+"</option>";
-                            }
-                        });
-                    }
-                });
-            }
-        });
-    }*/
+function updateBusStationList(selectedBus) {
+    var stations = getStationsHoursOfBus(selectedBus, false),
+        selectedText = $("#bus_station_list option:selected").text(),
+        stationsList = "",
+        length = stations[0].length,
+        index,
+        i;
+        for (i = 0; i < length; i++){
+            stationsList += "<option value="+stations[0][i]+">"+stations[1][i]+"</option>";
+        }
+        updateSelectMenu(true, selectedText, stationsList, stations);
 }
-function updateBusList() {
-/*    busList = "";
-    if (typeof selectedStation !== "undefined") {
-        $.each(buses, function(index, busValue) {
-            $.each(busValue.bus_stations, function(index, value) {
-                if (value.hasOwnProperty(selectedStation)) {
-                    busList += "<option>"+busValue.number+"</option>";
-                }
-            });
-        });
-    }*/
+function updateBusList(selectedStation) {
+    var buses = getBusesHoursOfStation(selectedStation, false),
+        selectedText = $("#bus_list option:selected").text(),
+        busList = "",
+        index;
+    $.each(buses, function(index, value) {
+        busList += "<option value="+value+">"+value+"</option>";
+    });
+    updateSelectMenu(false, selectedText, busList, buses);
+}
+// mardavari sarqel, kamel toxnel demo-ic heto
+function updateSelectMenu(condition, selectedText, list, array) {
+    if (condition) {
+        if (array.indexOf(selectedText) === -1 && selectedText === "Select bus station...") {
+            $("#bus_station_list option:not(:first)").remove();
+            $("#bus_station_list").append(list);
+        } else {
+            $("#bus_station_list option:not(:first)").remove();
+            $("#bus_station_list").append(list);
+            index = indexMatchingText($("#bus_station_list option"), selectedText);
+            $("#bus_station_list")[0].selectedIndex = index;
+            $("#bus_station_list").selectmenu("refresh");
+        }
+    } else {
+        if (array.indexOf(selectedText) === -1 && selectedText === "Select bus...") {
+            $("#bus_list option:not(:first)").remove();
+            $("#bus_list").append(list);
+        } else {
+            $("#bus_list option:not(:first)").remove();
+            $("#bus_list").append(list);
+            index = indexMatchingText($("#bus_list option"), selectedText);
+            $("#bus_list")[0].selectedIndex = index;
+            $("#bus_list").selectmenu("refresh");
+        }
+    }
+}
+function indexMatchingText(ele, text) {
+    var i;
+    for (i = 0; i < ele.length; i++) {
+        if (ele[i].childNodes[0].nodeValue === text){
+            return i;
+        }
+    }
+    return undefined;
 }
 $.mobile.document
     // Upon creation of the select menu, we want to make use of the fact that the ID of the
@@ -234,7 +265,7 @@ $.mobile.document
             buses = json[0].buses;
             busStations = json[0].bus_stations;
             $.each(buses, function(index, value){
-                busList += "<option>"+this.number+"</option>";
+                busList += "<option value='"+this.number+"'>"+this.number+"</option>";
             });
             $.each(busStations, function(index, value){
                 busStationsList += "<option value='"+this.id+"'>"+this.name+"</option>";
@@ -276,7 +307,7 @@ $.mobile.document
         } else {
             updateHoursTable(selectedBus, 0);
         }
-        //updateBusStationList()
+        //updateBusStationList(selectedBus);
     });
     $("#bus_station_list").on("change", function() {
         var selectedStation = this.value;
@@ -286,7 +317,7 @@ $.mobile.document
         } else {
             updateHoursTable(selectedStation, 1);
         }
-        //updateBusList();
+        updateBusList(selectedStation);
     });
     $("#bus_checkbox").on("change", function() {
         toggleSelects($("#bus_list"), $("#bus_checkbox"), $("#station_checkbox"));
