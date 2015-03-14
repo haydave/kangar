@@ -77,7 +77,7 @@ function getBothHoursList(bus, station) {
         if (value.number === parseInt(bus, 10)) {
             $.each(value.bus_stations, function(index, value) {
                 if (value.hasOwnProperty(station)) {
-                    $.each(value[selectedStation], function(index, value) {
+                    $.each(value[station], function(index, value) {
                         hours.push(value);
                     });
                     return false;
@@ -91,19 +91,14 @@ function getBothHoursList(bus, station) {
 // selected - string/integer - id of bus/station
 // state - integer - if 0 this is bus,
 //                   if 1 this is station,
-//                   if 2 there are both. 
 function updateHoursTable(selected, state) {
     var hours;
-        s1 = $("#bus_station_list");
-        s2 = $("#bus_list");
     if (typeof selected !== "undefined") {
         if (state === 0) {
             hours = getStationsHoursOfBus(selected, true);
         } else if (state === 1 ) {
-            hours = getBusesHoursOfStation(selected, true)
+            hours = getBusesHoursOfStation(selected, true);
         }
-    } else if (state === 2) {
-        hours = getBothHoursList(s2, s1);
     }
     drawTableOfHours(hours, state);
 }
@@ -142,7 +137,6 @@ function drawTableOfHours(hours, state) {
         });
         htmlString += "</tr>";
     }
-
     $("tbody").empty().append(htmlString);
     $("#hours-table").show();
 }
@@ -151,10 +145,10 @@ function drawTableOfHours(hours, state) {
 // checkbox2 - object - bus checkbox/ station checkbox
 function toggleSelects(selectMenu, checkbox1, checkbox2) {
     if (checkbox1[0].checked) {
-        selectMenu[0].selectedIndex = 0;
-        selectMenu.selectmenu("refresh").parents("form").show();
+        selectMenu.parents("form").show();
     } else {
-        selectMenu.parents("form").hide();   
+        selectMenu[0].selectedIndex = 0;
+        selectMenu.selectmenu("refresh").parents("form").hide();
     }
     if (!checkbox1[0].checked && !checkbox2.prop("checked")) {
         $("#hours-table").hide();
@@ -276,14 +270,22 @@ $.mobile.document
 
     $("#bus_list").on("change", function() {
         var selectedBus = this.value;
-        updateHoursTable(selectedBus, 0);
-        updateHoursTable(undefined, 2);
+            selectedStation = $("#bus_station_list")[0].value;
+        if (selectedStation !== "Select bus station..." && selectedBus !== "Select bus...") {
+            drawTableOfHours(getBothHoursList(selectedBus, selectedStation), 2);
+        } else {
+            updateHoursTable(selectedBus, 0);
+        }
         //updateBusStationList()
     });
     $("#bus_station_list").on("change", function() {
         var selectedStation = this.value;
-        updateHoursTable(selectedStation, 1);
-        updateHoursTable(undefined, 2);
+            selectedBus = $("#bus_list")[0].value;
+        if (selectedStation !== "Select bus station..." && selectedBus !== "Select bus...") {
+            drawTableOfHours(getBothHoursList(selectedBus, selectedStation), 2);
+        } else {
+            updateHoursTable(selectedStation, 1);
+        }
         //updateBusList();
     });
     $("#bus_checkbox").on("change", function() {
