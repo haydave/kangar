@@ -307,7 +307,7 @@ $.mobile.document
         } else {
             updateHoursTable(selectedBus, 0);
         }
-        //updateBusStationList(selectedBus);
+        updateBusStationList(selectedBus);
     });
     $("#bus_station_list").on("change", function() {
         var selectedStation = this.value;
