@@ -42,3 +42,9 @@
         margin-top: 12px; /* optional spacing during reflow */
     }
 }
+#item_checkboxes {
+	display: inline;
+}
+#map_checkbox {
+	float: right;
+}

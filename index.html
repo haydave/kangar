@@ -13,12 +13,16 @@
 
   <div role="main" class="ui-content">
     <form>
-        <fieldset data-role="controlgroup" data-type="horizontal">
-            <input name="bus_checkbox" id="bus_checkbox" type="checkbox">
-            <label for="bus_checkbox">Bus</label>
-            <input name="station_checkbox" id="station_checkbox" type="checkbox">
-            <label for="station_checkbox">Station</label>
-        </fieldset>
+      <fieldset data-role="controlgroup" data-type="horizontal" id="item_checkboxes">
+        <input name="item_checkbox" id="bus_checkbox" type="checkbox">
+        <label for="bus_checkbox">Bus</label>
+        <input name="item_checkbox" id="station_checkbox" type="checkbox">
+        <label for="station_checkbox">Station</label>
+      </fieldset>
+      <fieldset data-role="controlgroup" id="map_checkbox">
+        <input type="checkbox" name="show_map" id="show_map">
+        <label for="show_map">Show Map</label>
+      </fieldset>
     </form>
     <form>
         <div class="ui-field-contain">
