@@ -325,4 +325,18 @@ $.mobile.document
     $("#station_checkbox").on("change", function() {
         toggleSelects($("#bus_station_list"), $("#station_checkbox"), $("#bus_checkbox"));
     });
+    $("#show_map").on("change", function() {
+        if (this.checked) {
+            $("#bus_station_list")[0].selectedIndex = 0;
+            $("#bus_station_list").selectmenu("refresh").parents("form").hide();
+            $("#bus_list")[0].selectedIndex = 0;
+            $("#bus_list").selectmenu("refresh").parents("form").hide();
+            $("#hours-table").hide();
+            $("#map").show();
+        } else {
+            toggleSelects($("#bus_list"), $("#bus_checkbox"), $("#station_checkbox"), $("#show_map"));
+            toggleSelects($("#bus_station_list"), $("#station_checkbox"), $("#bus_checkbox"), $("#show_map"));
+            $("#map").hide();
+        }
+    });
 })( jQuery );

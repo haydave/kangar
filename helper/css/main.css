@@ -48,3 +48,9 @@
 #map_checkbox {
 	float: right;
 }
+#hours-table {
+	display: none;
+}
+#map {
+	display: none;	
+}
