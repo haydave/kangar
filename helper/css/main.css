@@ -53,8 +53,9 @@
 }
 #map {
 	display: none;
-	height: 400px;
-	width: 100%;
+  width: 240px;
+  height: 320px;
+  margin: 10px;
 }
 #info {
   position: absolute;

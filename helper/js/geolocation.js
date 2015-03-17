@@ -170,7 +170,7 @@ geolocateBtn.addEventListener('click', function() {
 
 // simulate device move
 var simulationData;
-$.getJSON('./helper/geolocation-orientation.json', function(data) {
+$.getJSON('./helper/data/geolocation-orientation.json', function(data) {
   simulationData = data.data;
 });
 var simulateBtn = document.getElementById('simulate');
@@ -214,6 +214,7 @@ function simulatePositionChange(position) {
 }
 
 function disableButtons() {
+  console.log("sads")
   geolocateBtn.disabled = 'disabled';
   simulateBtn.disabled = 'disabled';
 }
