@@ -1,7 +1,7 @@
 // creating the view
 var view = new ol.View({
-  center: ol.proj.transform([5.8713, 45.6452], 'EPSG:4326', 'EPSG:3857'),
-  zoom: 19
+  center: ol.proj.transform([46.7528000, 39.8177000], 'EPSG:4326', 'EPSG:3857'),
+  zoom: 15
 });
 
 // creating the map
@@ -28,7 +28,6 @@ var marker = new ol.Overlay({
   stopEvent: false
 });
 map.addOverlay(marker);
-
 // LineString to store the different geolocation positions. This LineString
 // is time aware.
 // The Z dimension is actually used to store the rotation (heading).
@@ -73,7 +72,7 @@ geolocation.on('change', function(evt) {
   document.getElementById('info').innerHTML = html;
 });
 
-geolocation.on('error', function() {
+geolocation.on('error', function(ev) {
   alert('geolocation error');
   // FIXME we should remove the coordinates in positions
 });
@@ -214,7 +213,17 @@ function simulatePositionChange(position) {
 }
 
 function disableButtons() {
-  console.log("sads")
   geolocateBtn.disabled = 'disabled';
   simulateBtn.disabled = 'disabled';
 }
+var busStopMarker = new ol.Overlay({
+  element: document.getElementById('busStopMarker')
+});
+
+var nearBusStopBtn = document.getElementById('nearBusStop');
+nearBusStopBtn.addEventListener('click', function() {
+  var projectedPosition = ol.proj.transform([46.7528000, 39.8177000], 'EPSG:4326',
+        'EPSG:3857');
+  busStopMarker.set('position', projectedPosition);
+  map.addOverlay(busStopMarker);
+}, false);
