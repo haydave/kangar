@@ -222,8 +222,54 @@ var busStopMarker = new ol.Overlay({
 
 var nearBusStopBtn = document.getElementById('nearBusStop');
 nearBusStopBtn.addEventListener('click', function() {
-  var projectedPosition = ol.proj.transform([46.7528000, 39.8177000], 'EPSG:4326',
+  var projectedPosition,
+    nearStop = getNearBusStop();
+    console.log(nearStop);
+  projectedPosition = ol.proj.transform(nearStop.coordinates, 'EPSG:4326',
         'EPSG:3857');
   busStopMarker.set('position', projectedPosition);
   map.addOverlay(busStopMarker);
+  var element = document.getElementsByClassName("ui-content");
+  element[0].innerHTML = nearStop.minDistance;
 }, false);
+
+function drawLineBetween2Points() {
+  // to do
+}
+
+function getNearBusStop() {
+  var wgs84Sphere = new ol.Sphere(6378137), // need to read about this
+      i = 0,
+      stopsCount,
+      distance,
+      min,
+      nearBusStop,
+      coordinatesOfStops = [[46.76401, 39.824321], [46.755401,39.817567]], //need to get data from json
+      myCoordinates = [46.7528000, 39.8177000]; // need to get real coordinates
+  stopsCount = coordinatesOfStops.length;
+  min = wgs84Sphere.haversineDistance(myCoordinates, coordinatesOfStops[i]); // need to read about methods of getting distance bettween 2 points
+  nearBusStop = coordinatesOfStops[i];
+  for (i = 1; i < stopsCount; i++) {
+    distance = wgs84Sphere.haversineDistance(myCoordinates, coordinatesOfStops[i]);
+    if (distance < min) {
+      min = distance;
+      nearBusStop = coordinatesOfStops[i];
+    }
+  }
+  return {
+    coordinates: nearBusStop,
+    minDistance: formatLength(min)
+  };
+}
+// change this function
+function formatLength(minDistance) {
+  var distance;
+  if (length > 100) {
+    distance = (Math.round(length / 1000 * 100) / 100) +
+        ' ' + 'km';
+  } else {
+    distance = (Math.round(length * 100) / 100) +
+        ' ' + 'm';
+  }
+  return distance;
+}
