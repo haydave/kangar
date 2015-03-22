@@ -51,13 +51,20 @@
 #hours-table {
 	display: none;
 }
-.map {
-  width: 100% !important;
-  height: 100% !important;
-  padding: 0! important;
+#map-page, #map-page .ui-content {
+  height:100%;
 }
+#map-page, #map-page .ui-content, .map {
+  width:100%;
+  height:100%;
+  padding:0px!important;
+}
+.map, .main-content {
+  margin-top: 50px;
+}
+
 .button {
   position: absolute;
-  bottom: 40px;
+  bottom: 50px;
   left: 10px;
 }
