@@ -1,8 +1,6 @@
-( function( $ ) {
-
 var buses,
     busStations;
-
+( function( $ ) {
 function pageIsSelectmenuDialog( page ) {
     var isDialog = false,
         id = page && page.attr( "id" );

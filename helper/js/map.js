@@ -21,11 +21,11 @@ GMaps.geolocate({
 
 $("#show_map").on("change", function(event) {
   if (this.checked) {
-    var defaultLatLng = new google.maps.LatLng(39.8177000, 46.7528000);  // Default to Stepanakert when no geolocation support
+    var defaultLatLng = [39.8177000, 46.7528000];  // Default to Stepanakert when no geolocation support
     if ( navigator.geolocation ) {
         function success(pos) {
             // Location found, show map with these coordinates
-            drawMap(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
+            drawMap([pos.coords.latitude, pos.coords.longitude]);
         }
         function fail(error) {
             drawMap(defaultLatLng);  // Failed to find location, show default map
@@ -36,21 +36,39 @@ $("#show_map").on("change", function(event) {
         drawMap(defaultLatLng);  // No geolocation support, show default map
     }
     function drawMap(latlng) {
-        var myOptions = {
-            zoom: 10,
-            center: latlng,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
-        };
-        var map = new google.maps.Map(document.getElementById("map"), myOptions);
+        map = new GMaps({
+          div: '#map',
+          lat: latlng[0],
+          lng: latlng[1],
+          maptype: 'ROADMAP',
+          zoom: 14
+        });
         // Add an overlay to the map of current lat/lng
-        var marker = new google.maps.Marker({
-            position: latlng,
-            map: map,
-            title: "Greetings!"
-        });
+        map.addMarker({
+          lat: latlng[0],
+          lng: latlng[1],
+          title: 'You',
+          infoWindow: {
+            content: '<p>You are here</p>'
+          }
+        });
+        drawStopMarkers(map);
     }
   }
 });
+
+function drawStopMarkers(map) {
+  $.each(busStations, function(index, value) {
+    map.addMarker({
+      lat: value.latlng[0],
+      lng: value.latlng[1],
+      title: value.name,
+      infoWindow: {
+        content: '<p>' + value.id + '-' + value.name + '</p>'
+      }
+    });
+  });
+}
 /*var busStopMarker = new ol.Overlay({
   element: document.getElementById('busStopMarker'),
   stopEvent: false
