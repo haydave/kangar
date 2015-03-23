@@ -19,56 +19,7 @@ GMaps.geolocate({
 });
 */
 
-$("#show_map").on("change", function(event) {
-  if (this.checked) {
-    var defaultLatLng = [39.8177000, 46.7528000];  // Default to Stepanakert when no geolocation support
-    if ( navigator.geolocation ) {
-        function success(pos) {
-            // Location found, show map with these coordinates
-            drawMap([pos.coords.latitude, pos.coords.longitude]);
-        }
-        function fail(error) {
-            drawMap(defaultLatLng);  // Failed to find location, show default map
-        }
-        // Find the users current position.  Cache the location for 5 minutes, timeout after 6 seconds
-        navigator.geolocation.getCurrentPosition(success, fail, {maximumAge: 500000, enableHighAccuracy:true, timeout: 6000});
-    } else {
-        drawMap(defaultLatLng);  // No geolocation support, show default map
-    }
-    function drawMap(latlng) {
-        map = new GMaps({
-          div: '#map',
-          lat: latlng[0],
-          lng: latlng[1],
-          maptype: 'ROADMAP',
-          zoom: 14
-        });
-        // Add an overlay to the map of current lat/lng
-        map.addMarker({
-          lat: latlng[0],
-          lng: latlng[1],
-          title: 'You',
-          infoWindow: {
-            content: '<p>You are here</p>'
-          }
-        });
-        drawStopMarkers(map);
-    }
-  }
-});
 
-function drawStopMarkers(map) {
-  $.each(busStations, function(index, value) {
-    map.addMarker({
-      lat: value.latlng[0],
-      lng: value.latlng[1],
-      title: value.name,
-      infoWindow: {
-        content: '<p>' + value.id + '-' + value.name + '</p>'
-      }
-    });
-  });
-}
 /*var busStopMarker = new ol.Overlay({
   element: document.getElementById('busStopMarker'),
   stopEvent: false
