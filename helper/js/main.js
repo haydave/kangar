@@ -356,12 +356,14 @@ $.mobile.document
         }
         function drawMap(latlng) {
             var map = new GMaps({
-              div: '#map',
-              lat: latlng[0],
-              lng: latlng[1],
-              maptype: 'ROADMAP',
-              zoom: 14
-            });
+                        div: '#map',
+                        lat: latlng[0],
+                        lng: latlng[1],
+                        maptype: 'ROADMAP',
+                        zoom: 14
+                    }),
+                stops,
+                nearStop;
             // Add an overlay to the map of current lat/lng
             map.addMarker({
               lat: latlng[0],
@@ -372,7 +374,9 @@ $.mobile.document
               }
             });
             drawStopMarkers(map);
-            drawRoutes(map);
+            stops = getAllStopsDistancesByRoutes(map);
+            nearStop = getNearStop(stops);
+            drawRoutes(map, nearStop);
         }
       }
     });
@@ -394,7 +398,46 @@ $.mobile.document
       });
     }
 
-    function drawRoutes(map) {
+    function getAllStopsDistancesByRoutes(map) {
+        var time = 0,
+            distance = 0,
+            stops = [],
+            i,
+            total = busStations.length;
+        $.each(busStations, function(index, value) {
+            map.getRoutes({
+                origin: [39.8177000, 46.7528000],
+                destination: value.latlng,
+                callback: function(e) {
+                    var length = e[0].legs.length;
+                    for (i = 0; i < length; i++) {
+                        time += e[0].legs[i].duration.value;
+                        distance += e[0].legs[i].distance.value;
+                    }
+                    stops.push({latlng: value.latlng, time: time, distance: distance});
+                    if (index === total - 1) {
+                        return stops;
+                    }
+                }
+            });
+        });
+    }
+
+    function getNearStop(stops) {
+        var i = 0,
+            min,
+            length = stops.length;
+        min = stops[i].distance;
+        for (i = 1; i < length; i++) {
+            if (stops[i].distance < min) {
+                nearBusStop = stops[i];
+            }
+        }
+        return nearBusStop;
+    }
+
+    function drawRoutes(map, nearStop) {
+        console.log(nearStop);
         map.drawRoute({
             origin: [39.8177000, 46.7528000],
             destination: [39.816900, 46.752457],
@@ -406,7 +449,7 @@ $.mobile.document
         map.getRoutes({
             origin: [39.8177000, 46.7528000],
             destination: [39.816900, 46.752457],
-            callback: function (e) {
+            callback: function(e) {
                 var time = 0;
                 var distance = 0;
                 for (var i=0; i<e[0].legs.length; i++) {
@@ -418,6 +461,7 @@ $.mobile.document
             }
         });
     }
+
     function formatLength(length) {
         var distance;
         if (length > 100) {
@@ -429,6 +473,7 @@ $.mobile.document
         }
         return distance;
     }
+
     function formatTime(seconds) {
         var time;
         if (seconds > 60) {
