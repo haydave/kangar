@@ -374,9 +374,7 @@ $.mobile.document
               }
             });
             drawStopMarkers(map);
-            stops = getAllStopsDistancesByRoutes(map);
-            nearStop = getNearStop(stops);
-            drawRoutes(map, nearStop);
+            getAllStopsDistancesByRoutes(map);
         }
       }
     });
@@ -397,11 +395,10 @@ $.mobile.document
         });
       });
     }
-
+    var stops;
     function getAllStopsDistancesByRoutes(map) {
         var time = 0,
             distance = 0,
-            stops = [],
             i,
             total = busStations.length;
         $.each(busStations, function(index, value) {
@@ -414,52 +411,73 @@ $.mobile.document
                         time += e[0].legs[i].duration.value;
                         distance += e[0].legs[i].distance.value;
                     }
-                    stops.push({latlng: value.latlng, time: time, distance: distance});
-                    if (index === total - 1) {
-                        return stops;
-                    }
+                    $(".tmp").append('{"latlng":['+value.latlng+'],'+'"time":'+time+','+'"distance":'+distance+'}');
+                    $(".tmp2").empty().append(index);
                 }
             });
         });
+        checkCallback();
+        function checkCallback() {
+            setTimeout(function() {
+                if (parseInt($(".tmp2").text(), 10) === total - 1) {
+                    stops = getStops();
+                    nearStop = getNearStop(stops);
+                    drawRoutes(map, nearStop);
+                } else {
+                    checkCallback();
+                }
+            }, 1000);
+        }
     }
 
+    function getStops() {
+        var array = $(".tmp").text().split("}{"),
+            stops = [],
+            length,
+            i = 0;
+        length = array.length;
+        array[0] = array[0].replace("{","");
+        array[length-1] = array[length-1].replace("}","");
+        for (; i < length; i++) {
+            stops.push(JSON.parse("{"+array[i]+"}"));
+        }
+        return stops;
+    }
+//MINIMUM@ distancian sxamal hamaematum blin
+//sax xarnvuma kamac kamac
+// shut aneliya prccneli
+// 
     function getNearStop(stops) {
         var i = 0,
             min,
+            nearStop,
             length = stops.length;
+            console.log(stops)
         min = stops[i].distance;
+        console.log(min);
         for (i = 1; i < length; i++) {
+            console.log(stops[i].distance)
             if (stops[i].distance < min) {
-                nearBusStop = stops[i];
+                console.log('aaaaaaaaaa');
+                nearStop = stops[i];
+                min = stops[i].distance; 
             }
         }
-        return nearBusStop;
+        return nearStop || stops[0];
     }
 
     function drawRoutes(map, nearStop) {
-        console.log(nearStop);
+        console.log(nearStop.latlng)
         map.drawRoute({
             origin: [39.8177000, 46.7528000],
-            destination: [39.816900, 46.752457],
+            destination: nearStop.latlng,
             travelMode: 'walking',
             strokeColor: '#131540',
             strokeOpacity: 0.6,
             strokeWeight: 6
         });
-        map.getRoutes({
-            origin: [39.8177000, 46.7528000],
-            destination: [39.816900, 46.752457],
-            callback: function(e) {
-                var time = 0;
-                var distance = 0;
-                for (var i=0; i<e[0].legs.length; i++) {
-                    time += e[0].legs[i].duration.value;
-                    distance += e[0].legs[i].distance.value;
-                }
-                $('.time').text(formatTime(time));
-                $('.distance').text(formatLength(distance));
-            }
-        });
+        $('.time').text(formatTime(nearStop.time));
+        $('.distance').text(formatLength(nearStop.distance));
     }
 
     function formatLength(length) {

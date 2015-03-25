@@ -66,15 +66,4 @@ function getNearBusStop() {
     minDistance: formatLength(min)
   };
 }
-
-function formatLength(minDistance) {
-  var distance;
-  if (minDistance > 100) {
-    distance = (Math.round(minDistance / 1000 * 100) / 100) +
-        ' ' + 'km';
-  } else {
-    distance = (Math.round(minDistance * 100) / 100) +
-        ' ' + 'm';
-  }
-  return distance;
-}*/
+*/
