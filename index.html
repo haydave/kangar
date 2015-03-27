@@ -10,9 +10,11 @@
     <div class="segmented-control ui-bar-d">
       <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
         <input name="item_checkbox" id="bus_checkbox" type="checkbox">
-        <label for="bus_checkbox">Bus</label>
+        <label for="bus_checkbox">Buses</label>
         <input name="item_checkbox" id="station_checkbox" type="checkbox">
-        <label for="station_checkbox">Station</label>
+        <label for="station_checkbox">Stations</label>
+        <input type="checkbox" name="nearBusStop" id="nearBusStop">
+        <label for="nearBusStop" class="tupo">Nearby bus stop</label>
         <input type="checkbox" name="show_map" id="show_map">
         <label for="show_map">Show Map</label>
       </fieldset>
@@ -45,9 +47,6 @@
       </table>
     </div>
     <div id="map" class="map"></div>
-    <div class="button">
-      <button id="nearBusStop">Nearby bus stop</button>
-    </div>
     <div class="time"></div>
     <div class="distance"></div>
     <div class="tmp" style="display:none"></div>

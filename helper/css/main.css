@@ -68,3 +68,6 @@
   bottom: 50px;
   left: 10px;
 }
+div.ui-checkbox:nth-child(3) {
+  display: none;
+}
