@@ -198,27 +198,33 @@
         "bus_stations": [
             {
                 "id": 1,
-                "name": "Heqimyan"
+                "name": "Heqimyan",
+                "latlng": [39.828531, 46.769302]
             },
             {
                 "id": 2,
-                "name": "Azatamartikneri"
+                "name": "Azatamartikneri",
+                "latlng": [39.821031, 46.758678]
             },
             {
                 "id": 3,
-                "name": "Tumanyan"
+                "name": "Tumanyan",
+                "latlng": [39.828712, 46.754962]
             },
             {
                 "id": 4,
-                "name": "Zorge"
+                "name": "Bagramyan",
+                "latlng": [39.828841, 46.747378]
             },
             {
                 "id": 5,
-                "name": "Manukyan"
+                "name": "Manukyan",
+                "latlng": [39.811836, 46.759381]
             },
             {
                 "id": 6,
-                "name": "Chaush"
+                "name": "Sargsyan",
+                "latlng": [39.816900, 46.752457]
             }
         ]
     }

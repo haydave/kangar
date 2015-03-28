@@ -1,8 +1,6 @@
-( function( $ ) {
-
 var buses,
     busStations;
-
+( function( $ ) {
 function pageIsSelectmenuDialog( page ) {
     var isDialog = false,
         id = page && page.attr( "id" );
@@ -150,10 +148,19 @@ function drawTableOfHours(hours, state) {
 // checkbox2 - object - bus checkbox/ station checkbox
 function toggleSelects(selectMenu, checkbox1, checkbox2) {
     if (checkbox1[0].checked) {
-        selectMenu.parents("form").show();
+        if ($("#station_checkbox").is(":checked") && $("div.ui-checkbox:nth-child(3)").is(":visible")) {
+            drawStopMarkers();
+        } else {
+            selectMenu.parents("form").show();
+        }
     } else {
-        selectMenu[0].selectedIndex = 0;
-        selectMenu.selectmenu("refresh").parents("form").hide();
+        if (!$("#station_checkbox").is(":checked") && $("div.ui-checkbox:nth-child(3)").is(":visible")) {
+            map.removeMarkers();
+            userLocationMarker(defaultLatLng);
+        } else {
+            selectMenu[0].selectedIndex = 0;
+            selectMenu.selectmenu("refresh").parents("form").hide();
+        }
     }
     if (!checkbox1[0].checked && !checkbox2.prop("checked")) {
         $("#hours-table").hide();
@@ -333,10 +340,195 @@ $.mobile.document
             $("#bus_list").selectmenu("refresh").parents("form").hide();
             $("#hours-table").hide();
             $("#map").show();
+            $("div.ui-checkbox:nth-child(3)").show();
         } else {
             toggleSelects($("#bus_list"), $("#bus_checkbox"), $("#station_checkbox"), $("#show_map"));
             toggleSelects($("#bus_station_list"), $("#station_checkbox"), $("#bus_checkbox"), $("#show_map"));
             $("#map").hide();
+            $("div.ui-checkbox:nth-child(3)").hide();
         }
     });
+    var map;
+    var defaultLatLng;
+    $("#show_map").on("change", function(event) {
+      if (this.checked) {
+        defaultLatLng = [39.8177000, 46.7528000];  // Default to Stepanakert when no geolocation support
+        if ( navigator.geolocation ) {
+            function success(pos) {
+                // Location found, show map with these coordinates
+                defaultLatLng = [pos.coords.latitude, pos.coords.longitude];
+                drawMap(defaultLatLng);
+            }
+            function fail(error) {
+                drawMap(defaultLatLng);  // Failed to find location, show default map
+            }
+            // Find the users current position.  Cache the location for 5 minutes, timeout after 6 seconds
+            navigator.geolocation.getCurrentPosition(success, fail, {maximumAge: 500000, enableHighAccuracy:true, timeout: 6000});
+        } else {
+            drawMap(defaultLatLng);  // No geolocation support, show default map
+        }
+        function drawMap(latlng) {
+            map = new GMaps({
+                        div: '#map',
+                        lat: latlng[0],
+                        lng: latlng[1],
+                        maptype: 'ROADMAP',
+                        zoom: 14
+                    });
+            userLocationMarker(latlng);
+        }
+      }
+    });
+    
+    function userLocationMarker(latlng) {
+        map.addMarker({
+          lat: latlng[0],
+          lng: latlng[1],
+          title: 'You',
+          infoWindow: {
+            content: '<p>You are here</p>'
+          }
+        });
+    }
+    $("#nearBusStop").on("change", function() {
+        if (this.checked) {
+            getAllStopsDistancesByRoutes();
+        } else {
+            map.cleanRoute()
+        }
+    })
+    function collectDataForInfoWindow(id) {
+        var data = getBusesHoursOfStation(id, true),
+            htmlBus = "";
+        busLength = data[0].length;
+        for (var i = 0; i < busLength; i++) {
+            htmlBus += "<div><b>"+data[0][i]+"</b> - ";
+            hoursLength = data[1][i].length;
+            for (var k = 0; k < hoursLength; k++) {
+                htmlBus += data[1][i][k] + " | ";  
+            }
+            htmlBus += "</div>";
+        }
+        return htmlBus;
+    }
+    function drawStopMarker(value) {
+        map.addMarker({
+          lat: value.latlng[0],
+          lng: value.latlng[1],
+          title: value.name,
+          infoWindow: {
+            content: collectDataForInfoWindow(value.id)
+          },
+          icon: "./img/kangarMarker.png"
+        });
+    }
+    function drawStopMarkers() {
+      $.each(busStations, function(index, value) {
+            drawStopMarker(value);
+      });
+    }
+    var stops;
+    function getAllStopsDistancesByRoutes() {
+        var i,
+            total = busStations.length;
+        $.each(busStations, function(index, value) {
+            map.getRoutes({
+                origin: [39.8177000, 46.7528000],
+                destination: value.latlng,
+                callback: function(e) {
+                    var time = 0,
+                        distance = 0,
+                        length = e[index].legs.length;
+                    for (i = 0; i < length; i++) {
+                        time += e[index].legs[i].duration.value;
+                        distance += e[index].legs[i].distance.value;
+                    }
+                    $(".tmp").append('{"latlng":['+value.latlng+'],'+'"time":'+time+','+'"distance":'+distance+'}');
+                    $(".tmp2").empty().append(index);
+                }
+            });
+        });
+        checkCallback();
+        function checkCallback() {
+            setTimeout(function() {
+                if (parseInt($(".tmp2").text(), 10) === total - 1) {
+                    stops = getStops();
+                    nearStop = getNearStop(stops);
+                    drawRoutes(nearStop);
+                } else {
+                    checkCallback();
+                }
+            }, 1000);
+        }
+    }
+
+    function getStops() {
+        var array = $(".tmp").text().split("}{"),
+            stops = [],
+            length,
+            i = 0;
+        length = array.length;
+        array[0] = array[0].replace("{","");
+        array[length-1] = array[length-1].replace("}","");
+        for (; i < length; i++) {
+            stops.push(JSON.parse("{"+array[i]+"}"));
+        }
+        return stops;
+    }
+
+    function getNearStop(stops) {
+        var i = 0,
+            min,
+            nearStop,
+            length = stops.length;
+        min = stops[i].distance;
+        for (i = 1; i < length; i++) {
+            if (stops[i].distance < min) {
+                nearStop = stops[i];
+                min = stops[i].distance; 
+            }
+        }
+        return nearStop || stops[0];
+    }
+
+    function drawRoutes(nearStop) {
+        map.drawRoute({
+            origin: [39.8177000, 46.7528000],
+            destination: nearStop.latlng,
+            travelMode: 'walking',
+            strokeColor: '#131540',
+            strokeOpacity: 0.6,
+            strokeWeight: 6
+        });
+        $('.time').text(formatTime(nearStop.time));
+        $('.distance').text(formatLength(nearStop.distance));
+        $.each(busStations, function(index, value) {
+            if (value.latlng[0] === nearStop.latlng[0] && value.latlng[1] === nearStop.latlng[1]) {
+                drawStopMarker(value);
+                return false;
+            }
+        });
+    }
+
+    function formatLength(length) {
+        var distance;
+        if (length > 100) {
+            distance = (Math.round(length / 1000 * 100) / 100) +
+            ' ' + 'km';
+        } else {
+            distance = (Math.round(length * 100) / 100) +
+            ' ' + 'm';
+        }
+        return distance;
+    }
+
+    function formatTime(seconds) {
+        var time;
+        if (seconds > 60) {
+            time = Math.round(seconds / 60 * 100) / 100 + ' ' + 'min';
+        } else {
+            time = seconds + ' ' + 's';
+        }
+        return time;
+    }
 })( jQuery );
