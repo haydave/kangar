@@ -397,20 +397,34 @@ $.mobile.document
             map.cleanRoute()
         }
     })
-    function drawStopMarkers() {
-      $.each(busStations, function(index, value) {
+    function collectDataForInfoWindow(id) {
+        var data = getBusesHoursOfStation(id, true),
+            htmlBus = "";
+        busLength = data[0].length;
+        for (var i = 0; i < busLength; i++) {
+            htmlBus += "<div><b>"+data[0][i]+"</b> - ";
+            hoursLength = data[1][i].length;
+            for (var k = 0; k < hoursLength; k++) {
+                htmlBus += data[1][i][k] + " | ";  
+            }
+            htmlBus += "</div>";
+        }
+        return htmlBus;
+    }
+    function drawStopMarker(value) {
         map.addMarker({
           lat: value.latlng[0],
           lng: value.latlng[1],
           title: value.name,
           infoWindow: {
-            content: '<p>' + value.id + '-' + value.name + '</p>'
-          },
-          click: function(e) {
-            console.log(e);
+            content: collectDataForInfoWindow(value.id)
           },
           icon: "./img/kangarMarker.png"
         });
+    }
+    function drawStopMarkers() {
+      $.each(busStations, function(index, value) {
+            drawStopMarker(value);
       });
     }
     var stops;
@@ -488,6 +502,12 @@ $.mobile.document
         });
         $('.time').text(formatTime(nearStop.time));
         $('.distance').text(formatLength(nearStop.distance));
+        $.each(busStations, function(index, value) {
+            if (value.latlng[0] === nearStop.latlng[0] && value.latlng[1] === nearStop.latlng[1]) {
+                drawStopMarker(value);
+                return false;
+            }
+        });
     }
 
     function formatLength(length) {
