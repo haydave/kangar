@@ -1,0 +1,12 @@
+a.navbar-brand {
+	padding: 0 15px !important;
+	margin: 5px 0 !important;
+}
+
+.add-bus-group {
+	margin-bottom: 10px;
+}
+
+.form-horizontal .form-group-sm .control-label {
+  padding-left: 15px;
+}
