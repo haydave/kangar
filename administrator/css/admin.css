@@ -10,3 +10,7 @@ a.navbar-brand {
 .form-horizontal .form-group-sm .control-label {
   padding-left: 15px;
 }
+
+.recently-image {
+	opacity: 0.5;
+}
