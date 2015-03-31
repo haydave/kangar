@@ -384,9 +384,9 @@ $.mobile.document
         map.addMarker({
           lat: latlng[0],
           lng: latlng[1],
-          title: 'You',
+          title: 'Դու',
           infoWindow: {
-            content: '<p>You are here</p>'
+            content: '<p>Դուք այստեղ եք</p>'
           }
         });
     }
